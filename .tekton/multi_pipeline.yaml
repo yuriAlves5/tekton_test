@@ -67,4 +67,4 @@ spec:
     name: conditional-pipeline
   params:
     - name: condition
-      value: "1"
+      value: "0"
