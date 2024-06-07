@@ -1,0 +1,70 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: pipeline-1-task
+spec:
+  steps:
+    - name: step1
+      image: ubuntu
+      script: |
+        #!/usr/bin/env bash
+        echo "Running pipeline 1, step 1"
+    - name: step2
+      image: ubuntu
+      script: |
+        #!/usr/bin/env bash
+        echo "Running pipeline 1, step 2"
+---
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: pipeline-2-task
+spec:
+  steps:
+    - name: step1
+      image: ubuntu
+      script: |
+        #!/usr/bin/env bash
+        echo "Running pipeline 2, step 1"
+    - name: step2
+      image: ubuntu
+      script: |
+        #!/usr/bin/env bash
+        echo "Running pipeline 2, step 2"
+---
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: conditional-pipeline
+spec:
+  params:
+    - name: condition
+      description: "A condition to determine which pipeline to run"
+      type: string
+      default: "0"
+  tasks:
+    - name: run-pipeline-1
+      when:
+        - input: "$(params.condition)"
+          operator: in
+          values: ["1"]
+      taskRef:
+        name: pipeline-1-task
+    - name: run-pipeline-2
+      when:
+        - input: "$(params.condition)"
+          operator: in
+          values: ["0"]
+      taskRef:
+        name: pipeline-2-task
+---
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  generateName: conditional-pipeline-run-
+spec:
+  pipelineRef:
+    name: conditional-pipeline
+  params:
+    - name: condition
+      value: "1"
